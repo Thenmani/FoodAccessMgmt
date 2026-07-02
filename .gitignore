@@ -1,0 +1,23 @@
+# Python
+backend/venv/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+.env
+*.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Data & secrets
+data/raw/
+
+# Backend
+backend/fsf_data.db
+
+# Editor / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
