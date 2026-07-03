@@ -174,7 +174,7 @@ def trigger_acs_fetch(acs_year: int = Query(2024)):
             "message": f"ACS {acs_year} already loaded",
             "tracts": existing.row_count,
         }
-        return {"message": f"ACS {acs_year} already in database", "cached": True}
+        return {"message": f"ACS {acs_year} already in database", "cached": True, "tracts": existing.row_count or 0}
 
     acs_fetch_status[acs_year] = {"status": "fetching", "message": "Starting..."}
     t = threading.Thread(target=_do_acs_fetch, args=(acs_year,), daemon=True)
@@ -193,8 +193,8 @@ def get_acs_fetch_status(acs_year: int = Query(2024)):
         ).first()
         db.close()
         if existing:
-            return {"status": "done", "message": f"ACS {acs_year} loaded", "tracts": existing.row_count}
-        return {"status": "not_started", "message": f"ACS {acs_year} not yet fetched"}
+            return {"status": "done", "message": f"ACS {acs_year} loaded", "tracts": existing.row_count or 0}
+        return {"status": "not_started", "message": f"ACS {acs_year} not yet fetched", "tracts": 0}
     return status
 
 
@@ -205,11 +205,7 @@ def get_acs_tracts(acs_year: int = Query(2024), db: Session = Depends(get_db)):
         UploadBatch.acs_year == acs_year,
     ).first()
     if not batch:
-        batch = db.query(UploadBatch).filter(
-            UploadBatch.status == "active"
-        ).order_by(UploadBatch.uploaded_at.desc()).first()
-    if not batch:
-        raise HTTPException(status_code=404, detail="No ACS data loaded yet")
+        raise HTTPException(status_code=404, detail=f"No ACS data loaded for year {acs_year}")
 
     records = db.query(ACSRecord).filter(ACSRecord.upload_batch_id == batch.id).all()
     return [

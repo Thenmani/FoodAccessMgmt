@@ -289,7 +289,7 @@ export default function HealthMap() {
         return;
       }
       if (data.cached) {
-        setAcsStatus(prev => ({ ...prev, [year]: { status: "done", message: `ACS ${year} loaded` } }));
+        setAcsStatus(prev => ({ ...prev, [year]: { status: "done", message: `ACS ${year} loaded`, tracts: data.tracts || 0 } }));
         await loadAcsData(year);
         showToast(`✅ ACS ${year} data loaded`);
         return;
@@ -302,7 +302,7 @@ export default function HealthMap() {
           if (stat.status === "done") {
             clearInterval(pollRef.current);
             await loadAcsData(year);
-            showToast(`✅ ACS ${year} — ${stat.tracts} tracts loaded`);
+            showToast(`✅ ACS ${year} — ${stat.tracts || "Data"} loaded successfully`);
           } else if (stat.status === "error") {
             clearInterval(pollRef.current);
             showToast(`❌ ${stat.message}`);
@@ -604,7 +604,7 @@ export default function HealthMap() {
                   : currentAcsStatus.status === "error" ? "#F09595" : "#fff",
               }}>
                 {isFetching ? "⏳ Fetching from Census Bureau..."
-                  : currentAcsStatus.status === "done"  ? `✓ ${currentAcsStatus.tracts} tracts loaded`
+                  : currentAcsStatus.status === "done"  ? `✓ ${currentAcsStatus.tracts ? currentAcsStatus.tracts + " tracts loaded" : "Data loaded"}`
                   : currentAcsStatus.status === "error" ? `✗ ${currentAcsStatus.message}` : ""}
               </span>
             )}
